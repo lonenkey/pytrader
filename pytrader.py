@@ -51,14 +51,21 @@ def backtest(df, initial_balance=10000):
             balance = position * df['Close'].iloc[i]
             position = 0
             print(f"Sold at {df['Close'].iloc[i]}, balance: {balance}")
-    final_value = float(balance + (position * df['Close'].iloc[-1].iloc[0]))
+    #final_value = float(balance + (position * df['Close'].values[-1])) 
+    #final_value = float(balance + (position * df['Close'].iat[-1]))  # Using .iat for direct access to scalar
+    #final_value = float(balance + (position * df['Close'].iloc[-1].item()))
+    #final_value = float(balance + (position * df['Close'].iloc[-1].squeeze()))
+    final_value = float(balance + (position * df['Close'].iloc[-1].squeeze()))
+
+
+
 
     print(f"Backtest completed, final value: {final_value}")
     return final_value
 
 # Run the bot
 if __name__ == "__main__":
-    stock = "AAPL"
+    stock = input("Enter the stock symbol: ")
     df = get_stock_data(stock, "2023-01-01", "2024-01-01")
     df = add_indicators(df)
     df = simple_strategy(df)
