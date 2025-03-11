@@ -18,6 +18,8 @@ def add_indicators(df):
     print(df.head())  # Print the first few rows of the data before adding indicators
     df['SMA_50'] = df['Close'].rolling(window=50).mean()
     df['SMA_200'] = df['Close'].rolling(window=200).mean()
+    df.dropna(inplace=True)
+
 
     # Ensure 'Close' is a 1D Series
     close_series = df['Close'].squeeze()
@@ -55,10 +57,8 @@ def backtest(df, initial_balance=10000):
     #final_value = float(balance + (position * df['Close'].iat[-1]))  # Using .iat for direct access to scalar
     #final_value = float(balance + (position * df['Close'].iloc[-1].item()))
     #final_value = float(balance + (position * df['Close'].iloc[-1].squeeze()))
-    final_value = float(balance + (position * df['Close'].iloc[-1].squeeze()))
-
-
-
+    #final_value = float(balance + (position * df['Close'].iloc[-1].squeeze()))
+    final_value = float(balance + (position * df['Close'].iloc[-1].iloc[0]))
 
     print(f"Backtest completed, final value: {final_value}")
     return final_value
