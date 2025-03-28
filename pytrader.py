@@ -20,7 +20,6 @@ def add_indicators(df):
     df['SMA_200'] = df['Close'].rolling(window=200).mean()
     df.dropna(inplace=True)
 
-
     # Ensure 'Close' is a 1D Series
     close_series = df['Close'].squeeze()
     rsi_indicator = ta.momentum.RSIIndicator(close_series, window=14)
@@ -53,15 +52,30 @@ def backtest(df, initial_balance=10000):
             balance = position * df['Close'].iloc[i]
             position = 0
             print(f"Sold at {df['Close'].iloc[i]}, balance: {balance}")
-    #final_value = float(balance + (position * df['Close'].values[-1])) 
-    #final_value = float(balance + (position * df['Close'].iat[-1]))  # Using .iat for direct access to scalar
-    #final_value = float(balance + (position * df['Close'].iloc[-1].item()))
-    #final_value = float(balance + (position * df['Close'].iloc[-1].squeeze()))
-    #final_value = float(balance + (position * df['Close'].iloc[-1].squeeze()))
     final_value = float(balance + (position * df['Close'].iloc[-1].iloc[0]))
-
     print(f"Backtest completed, final value: {final_value}")
     return final_value
+
+# NEW FUNCTION: uses the AI you shared to provide a simple report/score
+def get_ai_recommendation(symbol, final_value):
+    from openai import OpenAI
+    # Use the same API info you provided
+    client = OpenAI(api_key="PASTE_KEY_HERE", base_url="https://api.deepseek.com")
+
+    prompt_text = f"Please give a brief recommendation or report for {symbol}, based on the final backtest value: {final_value}."
+    
+    response = client.chat.completions.create(
+        model="deepseek-chat",
+        messages=[
+            {"role": "system", "content": "You are a helpful assistant."},
+            {"role": "user", "content": prompt_text}
+        ],
+        stream=False
+    )
+    
+    print("\n===== AI Recommendation =====")
+    print(response.choices[0].message.content)
+    print("=============================\n")
 
 # Run the bot
 if __name__ == "__main__":
@@ -72,6 +86,9 @@ if __name__ == "__main__":
     final_balance = backtest(df)
     print(f"Final balance after backtesting: ${final_balance:.2f}")
     
+    # Call the new function that uses AI to provide a recommendation
+    get_ai_recommendation(stock, final_balance)
+
     # Plot results
     plt.figure(figsize=(12,6))
     plt.plot(df['Close'], label='Close Price', alpha=0.6)
